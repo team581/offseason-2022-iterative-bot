@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 
 
 /**
@@ -14,18 +18,29 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
- 
 
-  /**
+CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
+XboxController controller= new XboxController(0);
+
+CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
+
+CANSparkMax shooter = new CANSparkMax(17,MotorType.kBrushless);
+
+CANSparkMax queuer = new CANSparkMax(18,MotorType.kBrushless);
+
+
+
+/**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  @Override
+
+   @Override
   public void robotInit() {
 
-  }  
-  
-  
+  }
+
+
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -54,7 +69,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     }
-  
+
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -62,7 +77,20 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double wristSpeed = controller.getRightX();
+
+    wrist.set(wristSpeed/3);
+
+    double intakeRollersSpeed = controller.getRightY();
+    intakeRollers.set(intakeRollersSpeed/3);
+
+    double shooterSpeed = controller.getLeftY();
+    shooter.set(shooterSpeed/3);
+
+    double queuerSpeed = controller.getLeftX();
+    queuer.set(queuerSpeed/3);
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
