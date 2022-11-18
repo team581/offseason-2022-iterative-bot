@@ -95,6 +95,8 @@ public class Robot extends TimedRobot {
 
     if (this.xboxController.getRightTriggerAxis()>0.5) {
       this.shooter.set(0.75);
+    } else {
+      this.shooter.set(0.0);
     }
 
     // double shooterSpeed = this.xboxController.getLeftY() / 3;
