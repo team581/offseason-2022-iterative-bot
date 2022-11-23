@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 
 
 /**
@@ -14,7 +18,12 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
-  
+  CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
+  CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
+  CANSparkMax shooter = new CANSparkMax(17, MotorType.kBrushless);
+  CANSparkMax queuer = new CANSparkMax(18, MotorType.kBrushless);
+  XboxController controller = new XboxController(0);
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -62,7 +71,20 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double rolling = controller.getLeftY();
+    double rollingVoltage = 
+    intakeRollers.set(rolling);
+
+    double wristing = controller.getLeftX();
+    wrist.set(wristing);
+
+    double shooting = controller.getRightY();
+    shooter.set(shooting);
+
+    double queueing = controller.getRightX();
+    queuer.set(queueing);
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
