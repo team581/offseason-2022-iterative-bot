@@ -32,9 +32,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-  }  
-  
-  
+  }
+
+
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -63,7 +63,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     }
-  
+
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -72,18 +72,29 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double rolling = controller.getLeftY();
-    double rollingVoltage = 
-    intakeRollers.set(rolling);
+    boolean rolling = controller.getLeftTriggerAxis() >  0.5;
+    if (rolling) {
+      intakeRollers.setVoltage(4);
+    }
 
-    double wristing = controller.getLeftX();
-    wrist.set(wristing);
+    boolean backwardsRolling = controller.getLeftBumper();
+    if (backwardsRolling) {
+      intakeRollers.setVoltage(-4);
+      queuer.setVoltage(-2);
+    }
 
-    double shooting = controller.getRightY();
-    shooter.set(shooting);
+    boolean wristing = controller.getRightTriggerAxis() > 0.5;
+    if (wristing) {
+      wrist.setVoltage(4);
+    }
+
+    boolean shooting = controller.getAButton();
+    if (shooting) {
+      shooter.setVoltage(6);
+    }
 
     double queueing = controller.getRightX();
-    queuer.set(queueing);
+    queuer.setVoltage(queueing * 4);
   }
 
   /** This function is called once when the robot is disabled. */
