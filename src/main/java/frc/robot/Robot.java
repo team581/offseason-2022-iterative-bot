@@ -24,7 +24,7 @@ public class Robot extends TimedRobot {
   private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
   private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
   private final XboxController controller = new XboxController(0);
- 
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -33,9 +33,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-  }  
-  
-  
+  }
+
+
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousPeriodic() {
     }
-  
+
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -74,13 +74,17 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double wristSpeed = controller.getRightX()/3;
-    double intakeRollersSpeed = controller.getRightY()/3;
-    double queuerSpeed = controller.getLeftY()/3;
     double shooterSpeed = controller.getLeftX()/3;
+    boolean aButton = controller.getAButton();
+    if (aButton) {
+      intakeRollers.set(0.5);
+      queuer.set(0.5);
+    }else{
+      intakeRollers.set(0);
+      queuer.set(0);
+    }
 
     wrist.set(wristSpeed);
-    intakeRollers.set(intakeRollersSpeed);
-    queuer.set(queuerSpeed);
     shooter.set(shooterSpeed);
   }
 
