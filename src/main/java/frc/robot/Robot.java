@@ -46,45 +46,46 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    wristPid.setP(0.5);
+    wristPid.setP(0.3);
     wristPid.setI(0);
     wristPid.setD(0);
     wristPid.setIZone(0);
     wristPid.setFF(0);
-    wristPid.setOutputRange(-0.5, 0.5);
+    wristPid.setOutputRange(-1, 1);
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    boolean rolling = controller.getLeftTriggerAxis() > 0.5;
-    boolean backwardsRolling = controller.getLeftBumper();
-    if (rolling) {
+    boolean intaking = controller.getLeftTriggerAxis() > 0.5;
+    boolean outtaking = controller.getLeftBumper();
+    boolean shooting = controller.getRightTriggerAxis() > 0.5;
+    if (intaking) {
       intakeRollers.set(0.4);
-      queuer.set(-0.5);
+      queuer.set(0.5);
+      shooter.set(0);
       wristPid.setReference(WRIST_POSITION_INTAKING, ControlType.kPosition);
-    } else if (backwardsRolling) {
+    } else if (outtaking) {
       intakeRollers.set(-0.4);
+      shooter.set(0);
       queuer.set(-0.5);
       wristPid.setReference(WRIST_POSITION_OUTTAKING, ControlType.kPosition);
-    } else {
-      intakeRollers.set(0);
-      queuer.set(0);
-      wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
-    }
-
-    boolean shooting = controller.getRightTriggerAxis() > 0.5;
-    if (shooting) {
+    } else if (shooting) {
+      intakeRollers.set(0.4);
       shooter.set(0.60);
       queuer.set(0.5);
+      wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     } else {
       shooter.set(0);
       queuer.set(0);
+      intakeRollers.set(0);
+      wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
   }
 
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("Queuer/current", queuer.getOutputCurrent());
     SmartDashboard.putNumber("wrist/angle", wristEncoder.getPosition() * 360 / GEARING);
   }
 }
