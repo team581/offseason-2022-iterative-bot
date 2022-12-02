@@ -5,11 +5,13 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,16 +26,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final double GEARING = 64;
-  private static final double WRIST_POSITION_UP = 0 * GEARING; 
-  private static final double WRIST_POSITION_DOWN = 0 * GEARING;
-  CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
-  CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
-  CANSparkMax shooter = new CANSparkMax(17, MotorType.kBrushless);
-  CANSparkMax queuer = new CANSparkMax(18, MotorType.kBrushless);
-  XboxController controller = new XboxController(0);
-  SparkMaxPIDController wristPid; 
-  SparkMaxRelativeEncoder wristEncoder;
+  /** 64:1 gearing reduction, 2:1 chain reduction. */
+  private static final double GEARING = 64 * 2;
+  private static final double WRIST_POSITION_OUTTAKING = 50.0 / 360.0 * GEARING;
+  private static final double WRIST_POSITION_INTAKING = 30.0 / 360.0 * GEARING;
+  private static final double WRIST_POSITION_IDLE = 110.0 / 360.0 * GEARING;
+  private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
+  private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
+  private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
+  private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
+  private final XboxController controller = new XboxController(0);
+  private final SparkMaxPIDController wristPid = wrist.getPIDController();
+  private final RelativeEncoder wristEncoder = wrist.getEncoder();
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -42,8 +46,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    wristPid = wrist.getPIDController();
-    wristPid.setP(0);
+    wristPid.setP(0.5);
     wristPid.setI(0);
     wristPid.setD(0);
     wristPid.setIZone(0);
@@ -58,15 +61,16 @@ public class Robot extends TimedRobot {
     boolean backwardsRolling = controller.getLeftBumper();
     if (rolling) {
       intakeRollers.set(0.4);
-      wristPid.setReference(WRIST_POSITION_UP, ControlType.kPosition);
+      queuer.set(-0.5);
+      wristPid.setReference(WRIST_POSITION_INTAKING, ControlType.kPosition);
     } else if (backwardsRolling) {
       intakeRollers.set(-0.4);
       queuer.set(-0.5);
-      wristPid.setReference(WRIST_POSITION_UP, ControlType.kPosition);
+      wristPid.setReference(WRIST_POSITION_OUTTAKING, ControlType.kPosition);
     } else {
       intakeRollers.set(0);
       queuer.set(0);
-      wristPid.setReference(WRIST_POSITION_DOWN, ControlType.kPosition);
+      wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
 
     boolean shooting = controller.getRightTriggerAxis() > 0.5;
@@ -81,7 +85,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-       SmartDashboard.putNumber("wrist/angle", wristEncoder.getPosition() / GEARING);
+    SmartDashboard.putNumber("wrist/angle", wristEncoder.getPosition() * 360 / GEARING);
   }
-
 }
