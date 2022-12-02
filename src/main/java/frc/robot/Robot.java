@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 
 
 /**
@@ -15,6 +19,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
  */
 public class Robot extends TimedRobot {
 
+  CANSparkMax intake = new CANSparkMax(15, MotorType.kBrushless);
+  XboxController controller = new XboxController(1);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -26,5 +32,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double speed = controller.getLeftY();
+    intake.set(speed);
+  }
 }
