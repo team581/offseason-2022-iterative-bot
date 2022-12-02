@@ -18,14 +18,8 @@ import edu.wpi.first.wpilibj.XboxController;
  * project.
  */
 public class Robot extends TimedRobot {
-
-  private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
-  private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
-  private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
-  private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
-  private final XboxController controller = new XboxController(0);
- 
-
+  public XboxController Controller= new XboxController(0);
+  public CANSparkMax WristMotor= new CANSparkMax(16, MotorType.kBrushless);
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -73,15 +67,19 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double wristSpeed = controller.getRightX()/3;
-    double intakeRollersSpeed = controller.getRightY()/3;
-    double queuerSpeed = controller.getLeftY()/3;
-    double shooterSpeed = controller.getLeftX()/3;
-
-    wrist.set(wristSpeed);
-    intakeRollers.set(intakeRollersSpeed);
-    queuer.set(queuerSpeed);
-    shooter.set(shooterSpeed);
+    if (Controller.getAButton()) {
+      // pressing a will bring the arm upwards
+      WristMotor.setVoltage(1.5);
+      
+    }
+    else if (Controller.getBButton()) {
+      WristMotor.setVoltage(-1.5);
+      
+    
+    }
+    else {
+      WristMotor.setVoltage(0);
+    }
   }
 
   /** This function is called once when the robot is disabled. */
