@@ -78,18 +78,26 @@ CANSparkMax queuer = new CANSparkMax(18,MotorType.kBrushless);
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double wristSpeed = controller.getRightX();
+    double wristSpeed = controller.getLeftY();
 
     wrist.set(wristSpeed/3);
 
-    double intakeRollersSpeed = controller.getRightY();
-    intakeRollers.set(intakeRollersSpeed/3);
+    double queuerSpeed = controller.getLeftTriggerAxis();
+      if (queuerSpeed > 0.1)
+      intakeRollers.set(-0.4);
+      queuer.set(-0.5);
 
-    double shooterSpeed = controller.getLeftY();
-    shooter.set(shooterSpeed/3);
+   else intakeRollers.set(0);
+    queuer.set(0);
 
-    double queuerSpeed = controller.getLeftX();
-    queuer.set(queuerSpeed/3);
+    double shooterSpeed = controller.getRightTriggerAxis();
+    if(shooterSpeed > 0.1)
+    shooter.set(0.6);
+    queuer.set(0.5);
+
+    boolean intakeRollersSpeed = controller.getLeftBumper();
+     if(intakeRollersSpeed)
+     intakeRollers.set(0.4);
   }
 
   /** This function is called once when the robot is disabled. */
