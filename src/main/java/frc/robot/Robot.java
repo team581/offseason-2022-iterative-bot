@@ -73,9 +73,29 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    double shooterSpeed;
+    double queuerSpeed;
+    double intakeRollersSpeed;
     double wristSpeed = 0.5;
-    double shooterSpeed = controller.getLeftX()/3;
+    double rightTrigger = controller.getRightTriggerAxis();
+    double leftTrigger = controller.getLeftTriggerAxis();
+    boolean leftBumper = controller.getLeftBumperPressed();
     double leftJoystickY = controller.getLeftY();
+
+    if (rightTrigger > 0.4) {
+      shooterSpeed = 0.6;
+      queuerSpeed = 0.5;
+    } else {
+      shooterSpeed = 0;
+      queuerSpeed = 0;
+    }
+
+    if (leftTrigger > 0.4) {
+      intakeRollersSpeed = 0.4;
+    } else {
+      intakeRollersSpeed = 0;
+    }
+
     if (leftJoystickY > 0.2) {
       wrist.set(-wristSpeed);
     }else if (leftJoystickY < -0.2) {
@@ -85,6 +105,8 @@ public class Robot extends TimedRobot {
     }
 
     shooter.set(shooterSpeed);
+    queuer.set(queuerSpeed);
+    intakeRollers.set(intakeRollersSpeed);
   }
 
   /** This function is called once when the robot is disabled. */
