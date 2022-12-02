@@ -87,23 +87,29 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double intakeRollerSpeed = this.xboxController.getRightY() / 3;
-    this.intakeRollers.set(intakeRollerSpeed);
 
     double wristSpeed = this.xboxController.getRightX() / 3;
     this.wrist.set(wristSpeed);
 
     if (this.xboxController.getRightTriggerAxis()>0.5) {
-      this.shooter.set(0.75);
+      this.shooter.set(0.6);
+      this.queuer.set(0.5);
     } else {
       this.shooter.set(0.0);
+      this.queuer.set(0.0);
     }
 
+    if (this.xboxController.getLeftTriggerAxis()>0.5) {
+      this.intakeRollers.set(0.4);
+    } else {
+      this.intakeRollers.set(0.0);
+    }
+
+    this.xboxController.whileActiveContinuous(this.intakeRollers.set(-0.4)).alongWith(this.queuer.set(-0.5));
     // double shooterSpeed = this.xboxController.getLeftY() / 3;
     // this.shooter.set(shooterSpeed);
 
-    double queuerSpeed = this.xboxController.getLeftX() / 3;
-    this.queuer.set(queuerSpeed);
+ 
   }
 
   /** This function is called once when the robot is disabled. */
