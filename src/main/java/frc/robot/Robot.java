@@ -26,8 +26,8 @@ public class Robot extends TimedRobot {
   private XboxController xboxController = new XboxController(0);
   private CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
   private CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
-  private CANSparkMax shooter = new CANSparkMax(17, MotorType.kBrushless);
-  private CANSparkMax queuer = new CANSparkMax(18, MotorType.kBrushless);
+  private CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
+  private CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -88,24 +88,31 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    double wristSpeed = this.xboxController.getRightX() / 3;
-    this.wrist.set(wristSpeed);
-
-    if (this.xboxController.getRightTriggerAxis()>0.5) {
-      this.shooter.set(0.6);
+    double wristSpeed = this.xboxController.getRightY() / 3;
+    this.wrist.set(-wristSpeed);
+    
+    boolean outtaking = this.xboxController.getLeftBumper();
+    boolean shooting = this.xboxController.getRightTriggerAxis()>0.5;
+    boolean intaking = this.xboxController.getLeftTriggerAxis()>0.5;
+    if (shooting) {
+      this.shooter.set(0.4);
       this.queuer.set(0.5);
-    } else {
+      intakeRollers.set(0.0);
+    } else if (intaking) {
+      this.intakeRollers.set(0.4);
       this.shooter.set(0.0);
       this.queuer.set(0.0);
-    }
-
-    if (this.xboxController.getLeftTriggerAxis()>0.5) {
-      this.intakeRollers.set(0.4);
+    } else if (outtaking) {
+      this.intakeRollers.set(-0.4);
+      this.queuer.set(-0.5);
+      this.shooter.set(0.0);
     } else {
       this.intakeRollers.set(0.0);
+      this.queuer.set(0.0);
+      this.shooter.set(0.0);
     }
 
-    this.xboxController.whileActiveContinuous(this.intakeRollers.set(-0.4)).alongWith(this.queuer.set(-0.5));
+
     // double shooterSpeed = this.xboxController.getLeftY() / 3;
     // this.shooter.set(shooterSpeed);
 
