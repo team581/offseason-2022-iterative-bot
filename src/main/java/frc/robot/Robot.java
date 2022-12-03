@@ -4,13 +4,15 @@
 
 package frc.robot;
 
-import java.lang.ModuleLayer.Controller;
-
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,6 +31,16 @@ public class Robot extends TimedRobot {
   private CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
   private CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
 
+  private final SparkMaxPIDController wristPID = wrist.getPIDController();
+
+  private final RelativeEncoder wristEncoder = wrist.getEncoder();
+
+  private static final double WRIST_GEARING = 60 * 2;
+
+  private static final double WRIST_INTAKING_POSITION = 35;
+  private static final double WRIST_OUTTAKING_POSITION = 60;
+  private static final double WRIST_IDLING_POSITION = 130;
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -36,6 +48,13 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+
+    wristPID.setP(0.075);
+    wristPID.setI(0);
+    wristPID.setD(0);
+    wristPID.setIZone(0);
+    wristPID.setFF(0.0);
+    wristPID.setOutputRange(-1, 1);
 
   }
 
@@ -51,6 +70,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("Wrist/Position", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
   }
 
   /**
@@ -87,36 +107,34 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-
-    double wristSpeed = this.xboxController.getRightY() / 3;
-    this.wrist.set(-wristSpeed);
-    
     boolean outtaking = this.xboxController.getLeftBumper();
-    boolean shooting = this.xboxController.getRightTriggerAxis()>0.5;
-    boolean intaking = this.xboxController.getLeftTriggerAxis()>0.5;
+    boolean shooting = this.xboxController.getRightTriggerAxis() > 0.5;
+    boolean intaking = this.xboxController.getLeftTriggerAxis() > 0.5;
     if (shooting) {
       this.shooter.set(0.4);
       this.queuer.set(0.5);
       intakeRollers.set(0.0);
+      wristPID.setReference(WRIST_IDLING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else if (intaking) {
       this.intakeRollers.set(0.4);
       this.shooter.set(0.0);
+      wristPID.setReference(WRIST_INTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
       this.queuer.set(0.0);
     } else if (outtaking) {
       this.intakeRollers.set(-0.4);
       this.queuer.set(-0.5);
       this.shooter.set(0.0);
+      wristPID.setReference(WRIST_OUTTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else {
       this.intakeRollers.set(0.0);
       this.queuer.set(0.0);
       this.shooter.set(0.0);
+      wristPID.setReference(WRIST_IDLING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     }
-
 
     // double shooterSpeed = this.xboxController.getLeftY() / 3;
     // this.shooter.set(shooterSpeed);
 
- 
   }
 
   /** This function is called once when the robot is disabled. */
