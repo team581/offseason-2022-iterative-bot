@@ -4,6 +4,12 @@
 
 package frc.robot;
 
+import javax.swing.text.Position;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -37,6 +43,7 @@ public class Robot extends TimedRobot {
   private static final double WRIST_POSITION_IDLE = 110.0 / 360.0 * WRIST_GEARING;
   private static final double SHOOTER_SHOOTING_VELOCITY = 2000 / 60.0 * 360.0;
   private static final double SHOOTING_IDLE = 800 / 60.0 *360.0;
+  private static final double ticksPerRotation = 12.8 * 2048;
   private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
   private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
   private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
@@ -48,7 +55,9 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder shootingEncoder = shooter.getEncoder();
   private final DigitalInput queuerSensor = new DigitalInput(0);
 
-
+  SwerveModule frontLeft = new SwerveModule(2, 3, "Front left log");
+  SwerveModule rearLeft = new SwerveModule(6, 7, "Front left log");
+  
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -115,6 +124,8 @@ public class Robot extends TimedRobot {
       intakeRollers.set(0);
       wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
+    frontLeft.setRotation(controller.getRightX());
+    rearLeft.setRotation(controller.getLeftX());
   }
 
   @Override
@@ -123,5 +134,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("wrist/angle", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
     SmartDashboard.putNumber("Shooter/Velocity", shootingEncoder.getVelocity() / 60.0 * 360.0);
     SmartDashboard.putBoolean("Queuer/sensor", queuerSensor.get());
+    frontLeft.log();
+    rearLeft.log();
   }
 }
