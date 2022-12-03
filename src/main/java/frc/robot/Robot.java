@@ -28,8 +28,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends TimedRobot {
   /** 64:1 gearing reduction, 2:1 chain reduction. */
   private static final double GEARING = 64 * 2;
-  private static final double WRIST_POSITION_OUTTAKING = 50.0 / 360.0 * GEARING;
-  private static final double WRIST_POSITION_INTAKING = 30.0 / 360.0 * GEARING;
+  private static final double WRIST_POSITION_OUTTAKING = 60.0 / 360.0 * GEARING;
+  private static final double WRIST_POSITION_INTAKING = 40.0 / 360.0 * GEARING;
   private static final double WRIST_POSITION_IDLE = 110.0 / 360.0 * GEARING;
   private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
   private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
@@ -52,6 +52,8 @@ public class Robot extends TimedRobot {
     wristPid.setIZone(0);
     wristPid.setFF(0);
     wristPid.setOutputRange(-1, 1);
+
+    intakeRollers.setInverted(true);
   }
 
   /** This function is called periodically during operator control. */
