@@ -9,6 +9,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -32,14 +33,22 @@ public class Robot extends TimedRobot {
   private CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
 
   private final SparkMaxPIDController wristPID = wrist.getPIDController();
+  
+  private final SparkMaxPIDController shooterPID = shooter.getPIDController();
+
 
   private final RelativeEncoder wristEncoder = wrist.getEncoder();
+  private final RelativeEncoder shooterEncoder = shooter.getEncoder();
+
 
   private static final double WRIST_GEARING = 60 * 2;
 
   private static final double WRIST_INTAKING_POSITION = 35;
   private static final double WRIST_OUTTAKING_POSITION = 60;
   private static final double WRIST_IDLING_POSITION = 130;
+
+  private static final double SHOOTER_SHOOTING_VELOCITY = 2000.0/60.0*360.0;
+  private static final double SHOOTER_IDLING_VELOCITY = 800.0/60.0*360.0;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -56,6 +65,21 @@ public class Robot extends TimedRobot {
     wristPID.setFF(0.0);
     wristPID.setOutputRange(-1, 1);
 
+    shooter.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    shooter.enableVoltageCompensation(10);
+    shooter.setSmartCurrentLimit(45);
+
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 40);
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 100);
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 100);
+
+    shooterPID.setP(0.0005);
+    shooterPID.setI(0);
+    shooterPID.setD(1);
+    shooterPID.setIZone(0);
+    shooterPID.setFF(0.00023);
+    shooterPID.setOutputRange(0, 1);
+
   }
 
   /**
@@ -71,6 +95,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     SmartDashboard.putNumber("Wrist/Position", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
+    SmartDashboard.putNumber("Shooter/Velocity", shooterEncoder.getVelocity()/60.0*360.0);
   }
 
   /**
@@ -111,24 +136,24 @@ public class Robot extends TimedRobot {
     boolean shooting = this.xboxController.getRightTriggerAxis() > 0.5;
     boolean intaking = this.xboxController.getLeftTriggerAxis() > 0.5;
     if (shooting) {
-      this.shooter.set(0.4);
+      shooterPID.setReference(SHOOTER_SHOOTING_VELOCITY*60.0/360.0, ControlType.kVelocity);
       this.queuer.set(0.5);
       intakeRollers.set(0.0);
       wristPID.setReference(WRIST_IDLING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else if (intaking) {
       this.intakeRollers.set(0.4);
-      this.shooter.set(0.0);
+      shooterPID.setReference(SHOOTER_IDLING_VELOCITY*60.0/360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_INTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
       this.queuer.set(0.0);
     } else if (outtaking) {
       this.intakeRollers.set(-0.4);
       this.queuer.set(-0.5);
-      this.shooter.set(0.0);
+      shooterPID.setReference(SHOOTER_IDLING_VELOCITY*60.0/360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_OUTTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else {
       this.intakeRollers.set(0.0);
       this.queuer.set(0.0);
-      this.shooter.set(0.0);
+      shooterPID.setReference(SHOOTER_IDLING_VELOCITY*60.0/360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_IDLING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
     }
 
