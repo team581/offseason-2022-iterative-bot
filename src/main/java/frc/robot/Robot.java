@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,12 +44,14 @@ public class Robot extends TimedRobot {
 
   private static final double WRIST_GEARING = 60 * 2;
 
-  private static final double WRIST_INTAKING_POSITION = 35;
+  private static final double WRIST_INTAKING_POSITION = 40;
   private static final double WRIST_OUTTAKING_POSITION = 60;
   private static final double WRIST_IDLING_POSITION = 130;
 
   private static final double SHOOTER_SHOOTING_VELOCITY = 2000.0/60.0*360.0;
   private static final double SHOOTER_IDLING_VELOCITY = 800.0/60.0*360.0;
+
+  private final DigitalInput queuerSensor = new DigitalInput(0);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -137,14 +140,24 @@ public class Robot extends TimedRobot {
     boolean intaking = this.xboxController.getLeftTriggerAxis() > 0.5;
     if (shooting) {
       shooterPID.setReference(SHOOTER_SHOOTING_VELOCITY*60.0/360.0, ControlType.kVelocity);
-      this.queuer.set(0.5);
-      intakeRollers.set(0.0);
-      wristPID.setReference(WRIST_IDLING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
+      wristPID.setReference(WRIST_INTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
+      if(readyToShoot()) {
+        queuer.set(0.5);
+        intakeRollers.set(0.4);
+      } else {
+        queuer.set(0.0);
+        intakeRollers.set(0.0);
+      }
     } else if (intaking) {
       this.intakeRollers.set(0.4);
       shooterPID.setReference(SHOOTER_IDLING_VELOCITY*60.0/360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_INTAKING_POSITION / 360.0 * WRIST_GEARING, ControlType.kPosition);
       this.queuer.set(0.0);
+      if(queuerSensor.get()) {
+        queuer.set(0.0);
+      } else {
+        queuer.set(0.25);
+      }
     } else if (outtaking) {
       this.intakeRollers.set(-0.4);
       this.queuer.set(-0.5);
@@ -190,5 +203,12 @@ public class Robot extends TimedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {
+  }
+
+  private boolean readyToShoot() {
+
+    double shooterVelocity = shooterEncoder.getVelocity()/60.0*360.0;
+    double error = Math.abs(SHOOTER_SHOOTING_VELOCITY - shooterVelocity);
+    return error < 25.0/60.0*360.0;
   }
 }
