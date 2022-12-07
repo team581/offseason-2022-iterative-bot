@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import com.revrobotics.CANSparkMax.ControlType;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -32,6 +33,8 @@ public class Robot extends TimedRobot {
 
   CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
 
+  double WristPosition = 1.0/6.0 * 128; //These numbers is arbitrary.
+  double WristPosition2 = 1.0/9.0 * 128;
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -44,6 +47,8 @@ public class Robot extends TimedRobot {
     wristPID.setP(0.1);
     wristPID.setI(0.1);
     wristPID.setD(0.1);
+    wristPID.setIZone(0.0);
+    wristPID.setOutputRange(-0.4, 0.4);
   }
 
 
@@ -68,7 +73,7 @@ public class Robot extends TimedRobot {
       queuer.set(0);
       shooter.set(0);
     } else if (shooting) {
-      shooter.set(0.6);
+      shooter.set(0.4);
       queuer.set(0.5);
       intakeRollers.set(0);
     } else if (outtaking) {
@@ -79,6 +84,11 @@ public class Robot extends TimedRobot {
       shooter.set(0);
       intakeRollers.set(0);
       queuer.set(0);
+    }
+    if(controller.getAButton()){
+      wristPID.setReference(WRISTPOSITION, ControlType.kPosition);
+    }else if(controller.getBButton()) {
+      wristPID.setReference(WRISTPOSITION2, ControlType.kPosition);
     }
   }
 
