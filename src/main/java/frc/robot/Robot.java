@@ -5,10 +5,14 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /**
@@ -25,6 +29,13 @@ public class Robot extends TimedRobot {
   private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
   private final XboxController controller = new XboxController(0);
 
+  private static final double WRIST_POSITION_INTAKING = 30;
+  private static final double WRIST_POSITION_OUTTAKING = 45;
+  private static final double WRIST_POSITION_IDLING = 110.0;
+  private static final double WRIST_GEARING = 360 * 60 * 2;
+
+  private final SparkMaxPIDController wristPID = wrist.getPIDController();
+  private final RelativeEncoder wristEncoder = wrist.getEncoder();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -32,7 +43,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-
+    wristPID.setP(0.3);
+    wristPID.setI(0.0);
+    wristPID.setD(0.0);
+    wristPID.setIZone(0.0);
+    wristPID.setOutputRange(-0.4, 0.4);
   }
 
 
@@ -45,7 +60,9 @@ public class Robot extends TimedRobot {
    * SmartDashboard integrated updating.
    */
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("wrist/position", wristEncoder.getPosition() / WRIST_GEARING);
+  }
 
   /**
    * This autonomous (along with the chooser code above) shows how to select between different
@@ -76,11 +93,9 @@ public class Robot extends TimedRobot {
     double shooterSpeed;
     double queuerSpeed;
     double intakeRollersSpeed;
-    double wristSpeed = 0.5;
     boolean shooting = controller.getRightTriggerAxis() > 0.4;
     boolean intaking = controller.getLeftTriggerAxis() > 0.4;
     boolean outtaking = controller.getLeftBumper();
-    double leftJoystickY = controller.getLeftY();
 
     if (shooting) {
       shooterSpeed = 0.4;
@@ -95,18 +110,13 @@ public class Robot extends TimedRobot {
 
     if (intaking) {
       intakeRollersSpeed = 0.4;
+      wristPID.setReference(WRIST_POSITION_INTAKING * WRIST_GEARING, CANSparkMax.ControlType.kPosition);
     } else if (outtaking) {
       intakeRollersSpeed = -0.4;
+      wristPID.setReference(WRIST_POSITION_OUTTAKING, CANSparkMax.ControlType.kPosition);
     } else {
       intakeRollersSpeed = 0;
-    }
-
-    if (leftJoystickY > 0.2) {
-      wrist.set(-wristSpeed);
-    }else if (leftJoystickY < -0.2) {
-      wrist.set(wristSpeed);
-    } else {
-      wrist.set(0);
+      wristPID.setReference(WRIST_POSITION_IDLING, CANSparkMax.ControlType.kPosition);
     }
 
     shooter.set(shooterSpeed);
