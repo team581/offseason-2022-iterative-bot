@@ -77,21 +77,26 @@ public class Robot extends TimedRobot {
     double queuerSpeed;
     double intakeRollersSpeed;
     double wristSpeed = 0.5;
-    double rightTrigger = controller.getRightTriggerAxis();
-    double leftTrigger = controller.getLeftTriggerAxis();
-    boolean leftBumper = controller.getLeftBumperPressed();
+    boolean shooting = controller.getRightTriggerAxis() > 0.4;
+    boolean intaking = controller.getLeftTriggerAxis() > 0.4;
+    boolean outtaking = controller.getLeftBumper();
     double leftJoystickY = controller.getLeftY();
 
-    if (rightTrigger > 0.4) {
-      shooterSpeed = 0.6;
+    if (shooting) {
+      shooterSpeed = 0.4;
       queuerSpeed = 0.5;
+    } else if (outtaking) {
+      queuerSpeed = -0.5;
+      shooterSpeed = 0;
     } else {
       shooterSpeed = 0;
       queuerSpeed = 0;
     }
 
-    if (leftTrigger > 0.4) {
+    if (intaking) {
       intakeRollersSpeed = 0.4;
+    } else if (outtaking) {
+      intakeRollersSpeed = -0.4;
     } else {
       intakeRollersSpeed = 0;
     }
