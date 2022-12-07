@@ -21,6 +21,10 @@ import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import org.w3c.dom.xpath.XPathResult;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -42,8 +46,16 @@ public class Robot extends TimedRobot {
   private static final double WRIST_POSITION_INTAKING = 40.0 / 360.0 * WRIST_GEARING;
   private static final double WRIST_POSITION_IDLE = 110.0 / 360.0 * WRIST_GEARING;
   private static final double SHOOTER_SHOOTING_VELOCITY = 2000 / 60.0 * 360.0;
-  private static final double SHOOTING_IDLE = 800 / 60.0 *360.0;
+  private static final double SHOOTING_IDLE = 800 / 60.0 * 360.0;
   private static final double ticksPerRotation = 12.8 * 2048;
+
+  private static final Translation2d frontLeftLocation = new Translation2d(-15, 15);
+  private static final Translation2d frontRightLocation = new Translation2d(15, 15);
+  private static final Translation2d backLeftLocation = new Translation2d(-15, -15);
+  private static final Translation2d backRightLocation = new Translation2d(15, -15);
+  private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(frontLeftLocation,
+      frontRightLocation, backLeftLocation, backRightLocation);
+
   private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
   private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
   private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
@@ -55,9 +67,11 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder shootingEncoder = shooter.getEncoder();
   private final DigitalInput queuerSensor = new DigitalInput(0);
 
-  SwerveModule frontLeft = new SwerveModule(2, 3, "Front left log");
-  SwerveModule rearLeft = new SwerveModule(6, 7, "Front left log");
-  
+  private final SwerveModule frontLeftModule = new SwerveModule(2, 3, "FrontLeft");
+  private final SwerveModule frontRightModule = new SwerveModule(4, 5, "FrontRight");
+  private final SwerveModule backLeftModule = new SwerveModule(6, 7, "BackLeft");
+  private final SwerveModule backRightModule = new SwerveModule(8, 9, "BackRight");
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any
@@ -110,22 +124,32 @@ public class Robot extends TimedRobot {
       wristPid.setReference(WRIST_POSITION_OUTTAKING, ControlType.kPosition);
     } else if (shooting) {
       shooterPid.setReference(SHOOTER_SHOOTING_VELOCITY * 60.0 / 360.0, ControlType.kVelocity);
-      wristPid.setReference(WRIST_POSITION_INTAKING , ControlType.kPosition);
+      wristPid.setReference(WRIST_POSITION_INTAKING, ControlType.kPosition);
       if (shootingEncoder.getVelocity() / 60.0 * 360.0 >= SHOOTER_SHOOTING_VELOCITY * 0.95) {
-          intakeRollers.set(0.4);
-          queuer.set(0.5);
-        } else {
-          intakeRollers.set(0);
-          queuer.set(0);
-        }
+        intakeRollers.set(0.4);
+        queuer.set(0.5);
+      } else {
+        intakeRollers.set(0);
+        queuer.set(0);
+      }
     } else {
       shooterPid.setReference(SHOOTING_IDLE * 60.0 / 360.0, ControlType.kVelocity);
       queuer.set(0);
       intakeRollers.set(0);
       wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
-    frontLeft.setRotation(controller.getRightX());
-    rearLeft.setRotation(controller.getLeftX());
+    //set front of the robot to positive Y
+    ChassisSpeeds speeds = new ChassisSpeeds(controller.getLeftX(), controller.getLeftY(), controller.getRightX());
+    SwerveModuleState[] moduleStates = KINEMATICS.toSwerveModuleStates(speeds);
+    SwerveModuleState frontLeft = moduleStates[0];
+    SwerveModuleState frontRight = moduleStates[1];
+    SwerveModuleState backLeft = moduleStates[2];
+    SwerveModuleState backRight = moduleStates[3];
+    
+    frontLeftModule.setAngleAndDrive(frontLeft.angle.getRadians(), frontLeft.speedMetersPerSecond);
+    frontRightModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
+    backLeftModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
+    backRightModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
   }
 
   @Override
@@ -134,7 +158,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("wrist/angle", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
     SmartDashboard.putNumber("Shooter/Velocity", shootingEncoder.getVelocity() / 60.0 * 360.0);
     SmartDashboard.putBoolean("Queuer/sensor", queuerSensor.get());
-    frontLeft.log();
-    rearLeft.log();
+    frontLeftModule.log();
+    frontRightModule.log();
+    backLeftModule.log();
+    backRightModule.log();
   }
 }
