@@ -100,9 +100,14 @@ public class Robot extends TimedRobot {
       }
     } else if (shooting) {
       shooterPID.setReference(SHOOTER_VELOCITY_SHOOTING * 60.0 / 360.0, ControlType.kVelocity);
-      queuer.set(0.5);
-      intakeRollers.set(0.4);
       wristPID.setReference(WRIST_POSITION_INTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
+      if (isReadyToShoot()) {
+        queuer.set(0.5);
+        intakeRollers.set(0.4);
+      } else {
+        queuer.set(0);
+        intakeRollers.set(0);
+      }
     } else if (outtaking) {
       intakeRollers.set(-0.4);
       queuer.set(-0.5);
@@ -115,4 +120,12 @@ public class Robot extends TimedRobot {
       wristPID.setReference(WRIST_POSITION_IDLE / 360.0 * WRIST_GEARING, ControlType.kPosition);
     }
   }
+
+  private boolean isReadyToShoot() {
+    double velocity = shooterEncoder.getVelocity() * 360.0 / 60.0;
+    double error = SHOOTER_VELOCITY_SHOOTING - velocity;
+
+    return Math.abs(error) < 150;
+  }
+
 }
