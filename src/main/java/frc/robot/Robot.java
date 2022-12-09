@@ -5,11 +5,14 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.revrobotics.CANSparkMax.ControlType;
 
 /**
@@ -23,74 +26,63 @@ import com.revrobotics.CANSparkMax.ControlType;
  */
 public class Robot extends TimedRobot {
 
-  CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
-  XboxController controller = new XboxController(0);
-  SparkMaxPIDController wristPID;
+  private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
+  private final XboxController controller = new XboxController(0);
+  private final SparkMaxPIDController wristPID = wrist.getPIDController();
+  private final RelativeEncoder wristEncoder = wrist.getEncoder();
 
-  CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
+  private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
 
-  CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
+  private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
 
-  CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
+  private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
 
-  double WristPosition = 1.0/6.0 * 128; //These numbers is arbitrary.
-  double WristPosition2 = 1.0/9.0 * 128;
-  /**
-   * This function is run when the robot is first started up and should be used
-   * for any
-   * initialization code.
-   */
+  private static final double WRIST_GEARING = 60.0 * 2.0;
+  private static final double WRIST_POSITION_IDLE = 90;
+  private static final double WRIST_POSITION_INTAKING = 40;
+  private static final double WRIST_POSITION_OUTTAKING = 60;
 
   @Override
   public void robotInit() {
-    wristPID = wrist.getPIDController();
     wristPID.setP(0.1);
-    wristPID.setI(0.1);
-    wristPID.setD(0.1);
+    wristPID.setI(0);
+    wristPID.setD(0);
     wristPID.setIZone(0.0);
-    wristPID.setOutputRange(-0.4, 0.4);
+    wristPID.setOutputRange(-1, 1);
   }
 
-
-
-
+  @Override
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("Wrist/Angle",wristEncoder.getPosition()*360.0 / WRIST_GEARING );
+  }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-
-
-
-    double wristSpeed = -controller.getLeftY();
-
-    wrist.set(wristSpeed / 3);
-
     boolean intaking = controller.getLeftTriggerAxis() > 0.5;
     boolean shooting = controller.getRightTriggerAxis() > 0.5;
     boolean outtaking = controller.getLeftBumper();
+
     if (intaking) {
       intakeRollers.set(0.4);
       queuer.set(0);
       shooter.set(0);
+      wristPID.setReference(WRIST_POSITION_INTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else if (shooting) {
       shooter.set(0.4);
       queuer.set(0.5);
       intakeRollers.set(0);
+      wristPID.setReference(WRIST_POSITION_IDLE / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else if (outtaking) {
       intakeRollers.set(-0.4);
       queuer.set(-0.5);
       shooter.set(0);
+      wristPID.setReference(WRIST_POSITION_OUTTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else {
       shooter.set(0);
       intakeRollers.set(0);
       queuer.set(0);
-    }
-    if(controller.getAButton()){
-      wristPID.setReference(WRISTPOSITION, ControlType.kPosition);
-    }else if(controller.getBButton()) {
-      wristPID.setReference(WRISTPOSITION2, ControlType.kPosition);
+      wristPID.setReference(WRIST_POSITION_IDLE / 360.0 * WRIST_GEARING, ControlType.kPosition);
     }
   }
-
-
 }
