@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -26,22 +27,28 @@ import com.revrobotics.CANSparkMax.ControlType;
  * project.
  */
 public class Robot extends TimedRobot {
-
-  private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
-  private final XboxController controller = new XboxController(0);
-  private final SparkMaxPIDController wristPID = wrist.getPIDController();
-  private final RelativeEncoder wristEncoder = wrist.getEncoder();
-  private final DigitalInput queuerSensor = new DigitalInput(0);
-  private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
-
-  private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
-
-  private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
-
   private static final double WRIST_GEARING = 60.0 * 2.0;
   private static final double WRIST_POSITION_IDLE = 120;
   private static final double WRIST_POSITION_INTAKING = 40;
   private static final double WRIST_POSITION_OUTTAKING = 60;
+
+  private static final double SHOOTER_VELOCITY_SHOOTING = 2000.0 * 360.0 / 60.0;
+  private static final double SHOOTER_VELOCITY_IDLE = 700.0 * 360.0 / 60.0;
+
+  private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
+  private final SparkMaxPIDController wristPID = wrist.getPIDController();
+  private final RelativeEncoder wristEncoder = wrist.getEncoder();
+
+  private final XboxController controller = new XboxController(0);
+
+  private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
+  private final DigitalInput queuerSensor = new DigitalInput(0);
+
+  private final CANSparkMax intakeRollers = new CANSparkMax(15, MotorType.kBrushless);
+
+  private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
+  private final RelativeEncoder shooterEncoder = shooter.getEncoder();
+  private final SparkMaxPIDController shooterPID = shooter.getPIDController();
 
   @Override
   public void robotInit() {
@@ -50,12 +57,29 @@ public class Robot extends TimedRobot {
     wristPID.setD(0);
     wristPID.setIZone(0.0);
     wristPID.setOutputRange(-1, 1);
+
+    shooter.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    shooter.enableVoltageCompensation(10);
+    shooter.setSmartCurrentLimit(45);
+
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 40);
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 100);
+    shooter.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 100);
+
+    shooterPID.setP(0.0005);
+    shooterPID.setI(0);
+    shooterPID.setD(1);
+    shooterPID.setIZone(0);
+    shooterPID.setFF(0.00023);
+    shooterPID.setOutputRange(0, 1);
+
     intakeRollers.setInverted(true);
   }
 
   @Override
   public void robotPeriodic() {
     SmartDashboard.putNumber("Wrist/Angle", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
+    SmartDashboard.putNumber("Shooter/Velocity", shooterEncoder.getVelocity() * 360.0 / 60.0);
   }
 
   /** This function is called periodically during operator control. */
@@ -67,7 +91,7 @@ public class Robot extends TimedRobot {
 
     if (intaking) {
       intakeRollers.set(0.4);
-      shooter.set(0);
+      shooterPID.setReference(SHOOTER_VELOCITY_IDLE * 60.0 / 360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_POSITION_INTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
       if (queuerSensor.get()) {
         queuer.set(0);
@@ -75,17 +99,17 @@ public class Robot extends TimedRobot {
         queuer.set(0.2);
       }
     } else if (shooting) {
-      shooter.set(0.4);
+      shooterPID.setReference(SHOOTER_VELOCITY_SHOOTING * 60.0 / 360.0, ControlType.kVelocity);
       queuer.set(0.5);
       intakeRollers.set(0.4);
       wristPID.setReference(WRIST_POSITION_INTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else if (outtaking) {
       intakeRollers.set(-0.4);
       queuer.set(-0.5);
-      shooter.set(0);
+      shooterPID.setReference(SHOOTER_VELOCITY_IDLE * 60.0 / 360.0, ControlType.kVelocity);
       wristPID.setReference(WRIST_POSITION_OUTTAKING / 360.0 * WRIST_GEARING, ControlType.kPosition);
     } else {
-      shooter.set(0);
+      shooterPID.setReference(SHOOTER_VELOCITY_IDLE * 60.0 / 360.0, ControlType.kVelocity);
       intakeRollers.set(0);
       queuer.set(0);
       wristPID.setReference(WRIST_POSITION_IDLE / 360.0 * WRIST_GEARING, ControlType.kPosition);
