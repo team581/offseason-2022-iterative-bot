@@ -10,6 +10,10 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -31,6 +35,13 @@ public class Robot extends TimedRobot {
   private static final double WRIST_POSITION_IDLE = 120;
   private static final double WRIST_POSITION_INTAKING = 40;
   private static final double WRIST_POSITION_OUTTAKING = 60;
+
+  private static final Translation2d SWERVE_FRONT_LEFT_LOCATION = new Translation2d(15, 15);
+  private static final Translation2d SWERVE_FRONT_RIGHT_LOCATION = new Translation2d(15, -15);
+  private static final Translation2d SWERVE_BACK_LEFT_LOCATION = new Translation2d(-15, 15);
+  private static final Translation2d SWERVE_BACK_RIGHT_LOCATION = new Translation2d(-15, -15);
+  private static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(SWERVE_FRONT_LEFT_LOCATION,
+      SWERVE_FRONT_RIGHT_LOCATION, SWERVE_BACK_LEFT_LOCATION, SWERVE_BACK_RIGHT_LOCATION);
 
   private static final double SHOOTER_VELOCITY_SHOOTING = 2000.0 * 360.0 / 60.0;
   private static final double SHOOTER_VELOCITY_IDLE = 700.0 * 360.0 / 60.0;
@@ -119,6 +130,13 @@ public class Robot extends TimedRobot {
       queuer.set(0);
       wristPID.setReference(WRIST_POSITION_IDLE / 360.0 * WRIST_GEARING, ControlType.kPosition);
     }
+
+    double drivingSideways = controller.getLeftX();
+    double drivingForward = -controller.getLeftY();
+    double drivingRotation = controller.getRightY() * 2.0 / 3.0;
+
+    ChassisSpeeds speeds = new ChassisSpeeds(drivingSideways, drivingForward, drivingRotation);
+    swerveDriveTeleop(speeds);
   }
 
   private boolean isReadyToShoot() {
@@ -126,6 +144,11 @@ public class Robot extends TimedRobot {
     double error = SHOOTER_VELOCITY_SHOOTING - velocity;
 
     return Math.abs(error) < 150;
+  }
+
+  private void swerveDriveTeleop(ChassisSpeeds speeds) {
+    SwerveModuleState[] states = SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
+
   }
 
 }
