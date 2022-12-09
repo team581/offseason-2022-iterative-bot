@@ -11,6 +11,10 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -52,6 +56,21 @@ public class Robot extends TimedRobot {
   private static final double SHOOTER_IDLING_VELOCITY = 800.0/60.0*360.0;
 
   private final DigitalInput queuerSensor = new DigitalInput(0);
+
+//swerve
+  private static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(0.381, 0.381);
+  private static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(0.381, -0.381);
+  private static final Translation2d BACK_LEFT_LOCATION = new Translation2d(-0.381, 0.381);
+  private static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(-0.381, -0.381);
+
+
+  SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+  FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
+
+  
+ 
+
+
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -173,6 +192,18 @@ public class Robot extends TimedRobot {
     // double shooterSpeed = this.xboxController.getLeftY() / 3;
     // this.shooter.set(shooterSpeed);
 
+
+    ChassisSpeeds speeds = new ChassisSpeeds(xboxController.getRightY() * 3.0,xboxController.getRightX() * 3.0, xboxController.getLeftX()*3.0);
+
+    SwerveModuleState[] moduleStates = KINEMATICS.toSwerveModuleStates(speeds);
+
+    SwerveModuleState frontLeft = moduleStates[0];
+ 
+    SwerveModuleState frontRight = moduleStates[1];
+
+    SwerveModuleState backLeft = moduleStates[2];
+
+    SwerveModuleState backRight = moduleStates[3];
   }
 
   /** This function is called once when the robot is disabled. */
