@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -67,10 +68,14 @@ public class Robot extends TimedRobot {
   private final RelativeEncoder shootingEncoder = shooter.getEncoder();
   private final DigitalInput queuerSensor = new DigitalInput(0);
 
-  private final SwerveModule frontLeftModule = new SwerveModule(2, 3, "FrontLeft");
-  private final SwerveModule frontRightModule = new SwerveModule(4, 5, "FrontRight");
-  private final SwerveModule backLeftModule = new SwerveModule(6, 7, "BackLeft");
-  private final SwerveModule backRightModule = new SwerveModule(8, 9, "BackRight");
+  private final SwerveModule frontLeftModule = new SwerveModule(2, 3, "FrontLeft", new CANCoder(10),
+     Rotation2d.fromDegrees(104.6));
+  private final SwerveModule frontRightModule = new SwerveModule(4, 5, "FrontRight", new CANCoder(11),
+     Rotation2d.fromDegrees(78.95));
+  private final SwerveModule backLeftModule = new SwerveModule(6, 7, "BackLeft", new CANCoder(12), 
+   Rotation2d.fromDegrees(-148.0));
+  private final SwerveModule backRightModule = new SwerveModule(8, 9, "BackRight", new CANCoder(13),
+     Rotation2d.fromDegrees(-62.53));
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -138,18 +143,18 @@ public class Robot extends TimedRobot {
       intakeRollers.set(0);
       wristPid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
-    //set front of the robot to positive Y
+    // set front of the robot to positive Y
     ChassisSpeeds speeds = new ChassisSpeeds(controller.getLeftX(), controller.getLeftY(), controller.getRightX());
     SwerveModuleState[] moduleStates = KINEMATICS.toSwerveModuleStates(speeds);
     SwerveModuleState frontLeft = moduleStates[0];
     SwerveModuleState frontRight = moduleStates[1];
     SwerveModuleState backLeft = moduleStates[2];
     SwerveModuleState backRight = moduleStates[3];
-    
-    frontLeftModule.setAngleAndDrive(frontLeft.angle.getRadians(), frontLeft.speedMetersPerSecond);
-    frontRightModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
-    backLeftModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
-    backRightModule.setAngleAndDrive(controller.getRightX(), controller.getLeftY());
+
+    frontLeftModule.setAngleAndDrive(frontLeft.angle, frontLeft.speedMetersPerSecond);
+    frontRightModule.setAngleAndDrive(frontRight.angle, frontRight.speedMetersPerSecond);
+    backLeftModule.setAngleAndDrive(backLeft.angle, backLeft.speedMetersPerSecond);
+    backRightModule.setAngleAndDrive(backRight.angle, backRight.speedMetersPerSecond);
   }
 
   @Override
