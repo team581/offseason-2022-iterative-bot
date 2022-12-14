@@ -10,11 +10,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 
-
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the
+ * name of this class or
+ * the package after creating this project, you must also update the
+ * build.gradle file in the
  * project.
  */
 public class Robot extends TimedRobot {
@@ -24,30 +26,48 @@ public class Robot extends TimedRobot {
   private final CANSparkMax queuer = new CANSparkMax(17, MotorType.kBrushless);
   private final CANSparkMax shooter = new CANSparkMax(18, MotorType.kBrushless);
   private final XboxController controller = new XboxController(0);
- 
 
   /**
-   * This function is run when the robot is first started up and should be used for any
+   * This function is run when the robot is first started up and should be used
+   * for any
    * initialization code.
    */
   @Override
   public void robotInit() {
 
-  }  
+  }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
     // Boolean shooterandqueuer = controller.getXButton()
-    boolean shooterandqueuer = controller.getRightTriggerAxis() > 0.5;
-   
-    if (shooterandqueuer) {
+    boolean isShooting = controller.getRightTriggerAxis() > 0.5;
+    boolean isIntaking = controller.getLeftTriggerAxis() > 0.5;
+    boolean isOuttaking = controller.getLeftBumper();
+    double wristPercentage = controller.getLeftY() / 3;
+
+    if (isShooting) {
       shooter.set(0.4);
       queuer.set(0.5);
     } else {
       shooter.set(0);
       queuer.set(0);
     }
-  }
 
+    if (isIntaking){
+      intakeRollers.set(0.4);
+    } else {
+      intakeRollers.set(0);
+    }
+
+    if (isOuttaking) {
+      shooter.set(-0.4);
+      queuer.set(-0.5);
+    } else {
+      shooter.set(0);
+      queuer.set(0);
+    }
+
+    wrist.set(wristPercentage);
+  }
 }
