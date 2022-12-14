@@ -4,12 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -45,6 +48,12 @@ public class Robot extends TimedRobot {
 
   private static final double SHOOTER_VELOCITY_SHOOTING = 2000.0 * 360.0 / 60.0;
   private static final double SHOOTER_VELOCITY_IDLE = 700.0 * 360.0 / 60.0;
+
+  private final SwerveModule frontLeft = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "FrontLeft");
+  private final SwerveModule frontRight = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "FrontRight");
+  private final SwerveModule backLeft = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "BackLeft");
+  private final SwerveModule backRight = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "BackRight");
+
 
   private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
   private final SparkMaxPIDController wristPID = wrist.getPIDController();
@@ -91,6 +100,10 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     SmartDashboard.putNumber("Wrist/Angle", wristEncoder.getPosition() * 360.0 / WRIST_GEARING);
     SmartDashboard.putNumber("Shooter/Velocity", shooterEncoder.getVelocity() * 360.0 / 60.0);
+    frontLeft.log();
+    frontRight.log();
+    backLeft.log();
+    backRight.log();
   }
 
   /** This function is called periodically during operator control. */
@@ -148,7 +161,10 @@ public class Robot extends TimedRobot {
 
   private void swerveDriveTeleop(ChassisSpeeds speeds) {
     SwerveModuleState[] states = SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
-
+    frontLeft.setState(states[0]);
+    frontRight.setState(states[1]);
+    backLeft.setState(states[2]);
+    backRight.setState(states[3]);
   }
 
 }
