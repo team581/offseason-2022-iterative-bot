@@ -42,12 +42,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
   /** 64:1 gearing reduction, 2:1 chain reduction. */
-  private static final double WRIST_GEARING = 64 * 2;
+  private static final double WRIST_GEARING = 60 * 2;
   private static final double WRIST_POSITION_OUTTAKING = 60.0 / 360.0 * WRIST_GEARING;
   private static final double WRIST_POSITION_INTAKING = 40.0 / 360.0 * WRIST_GEARING;
   private static final double WRIST_POSITION_IDLE = 110.0 / 360.0 * WRIST_GEARING;
   private static final double SHOOTER_SHOOTING_VELOCITY = 2000 / 60.0 * 360.0;
-  private static final double SHOOTING_IDLE = 800 / 60.0 * 360.0;
+  private static final double SHOOTING_IDLE = 800 / 60.0 * 360.0 * 0;
   private static final double ticksPerRotation = 12.8 * 2048;
 
   private static final Translation2d frontLeftLocation = new Translation2d(-15, 15);
@@ -69,13 +69,13 @@ public class Robot extends TimedRobot {
   private final DigitalInput queuerSensor = new DigitalInput(0);
 
   private final SwerveModule frontLeftModule = new SwerveModule(2, 3, "FrontLeft", new CANCoder(10),
-     Rotation2d.fromDegrees(104.6));
+     Rotation2d.fromDegrees(194.6));
   private final SwerveModule frontRightModule = new SwerveModule(4, 5, "FrontRight", new CANCoder(11),
-     Rotation2d.fromDegrees(78.95));
+     Rotation2d.fromDegrees(168.95));
   private final SwerveModule backLeftModule = new SwerveModule(6, 7, "BackLeft", new CANCoder(12), 
-   Rotation2d.fromDegrees(-148.0));
+   Rotation2d.fromDegrees(-58.0));
   private final SwerveModule backRightModule = new SwerveModule(8, 9, "BackRight", new CANCoder(13),
-     Rotation2d.fromDegrees(-62.53));
+     Rotation2d.fromDegrees(27.47));
 
   /**
    * This function is run when the robot is first started up and should be used

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -38,6 +39,7 @@ public class SwerveModule {
         steering.config_kF(0, 0);
         steering.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 15, 15, 0));
         steering.setInverted(false);
+        steering.setNeutralMode(NeutralMode.Brake);
 
         resetWheelAngle();
     }
@@ -50,12 +52,20 @@ public class SwerveModule {
         //divide by 360 bc 360 degrees is 1 rotation and we don't have getRotations() so we need to convert degrees to rotations. 
         steering.set(TalonFXControlMode.Position, angle.getDegrees() * ticksPerRotation / 360);
         drive.set(TalonFXControlMode.PercentOutput, driving);
+
+        SmartDashboard.putNumber("Swerve/" + name + "/angle",angle.getDegrees());
     }
 
     public void log() {
-        SmartDashboard.putNumber("Swerve/" + name + "/Position", steering.getSelectedSensorPosition() / ticksPerRotation);
-        // SmartDashboard.putNumber("Swerve/" + name + "/Speed", drive.get)
+        SmartDashboard.putNumber("Swerve/" + name + "/Position", steering.getSelectedSensorPosition() / ticksPerRotation * 360);
+        //SmartDashboard.putNumber("Swerve/FrontLeft", .angle);
+        //SmartDashboard.putNumber("Swerve/" + name + "/Speed", drive.getVelocity());
     }
+
+    // private double getVelocity() {
+    //     double ticksPer100msBeforeGearing = drive.getSelectedSensorVelocity();
+    //     double ticksPerSecondBeforeGearing = ticksPer100msBeforeGearing * 10.0;
+    // }
 
     private void resetWheelAngle() {
         Rotation2d actualRotations = getCancoderPosition(); 
