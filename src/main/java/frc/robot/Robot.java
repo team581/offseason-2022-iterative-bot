@@ -50,7 +50,7 @@ public class Robot extends TimedRobot {
       shooter.set(0.4);
       queuer.set(0.5);
       intakeRollers.set(0);
-    } else if ( isIntaking) {
+    } else if (isIntaking) {
       intakeRollers.set(0.4);
       shooter.set(0);
       queuer.set(0);
