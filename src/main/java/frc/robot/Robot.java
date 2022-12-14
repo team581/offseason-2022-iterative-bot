@@ -49,23 +49,19 @@ public class Robot extends TimedRobot {
     if (isShooting) {
       shooter.set(0.4);
       queuer.set(0.5);
-    } else {
+      intakeRollers.set(0);
+    } else if ( isIntaking) {
+      intakeRollers.set(0.4);
       shooter.set(0);
       queuer.set(0);
-    }
-
-    if (isIntaking){
-      intakeRollers.set(0.4);
-    } else {
-      intakeRollers.set(0);
-    }
-
-    if (isOuttaking) {
+    } else if (isOuttaking) {
       shooter.set(-0.4);
       queuer.set(-0.5);
+      intakeRollers.set(0);
     } else {
       shooter.set(0);
       queuer.set(0);
+      intakeRollers.set(0);
     }
 
     wrist.set(wristPercentage);
