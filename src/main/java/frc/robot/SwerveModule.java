@@ -53,7 +53,7 @@ public class SwerveModule {
   }
 
   private Rotation2d getCancoderAngle() {
-    return Rotation2d.fromDegrees(canCoder.getAbsolutePosition());
+    return Rotation2d.fromDegrees(canCoder.getAbsolutePosition()).minus(angleOffset);
   }
 
   private Rotation2d getSteerMotorAngle() {
@@ -74,8 +74,6 @@ public class SwerveModule {
 
   private void resetSteerMotorAngle() {
     Rotation2d canCoderAngle = getCancoderAngle();
-    Rotation2d steerMotorAngle = canCoderAngle.minus(angleOffset);
-    steerMotor.setSelectedSensorPosition(steerMotorAngle.getDegrees() * 12.8 * 2048.0);
-
+    steerMotor.setSelectedSensorPosition(canCoderAngle.getDegrees() * 12.8 * 2048.0);
   }
 }
