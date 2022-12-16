@@ -121,26 +121,28 @@ public class Robot extends TimedRobot {
 
     if (shooting) {
       shooterPID.setReference(SHOOTER_VELOCITY_SHOOTING * 60.0 / 360.0, ControlType.kVelocity);
-      if (shooterEncoder.getVelocity() / 60.0 * 360 >=) { //WHERE I LEFT OFF
-        set queuer
+      double shooterVelocity = shooterEncoder.getVelocity() / 60.0 * 360.0;
+      double error = Math.abs(shooterVelocity - SHOOTER_VELOCITY_SHOOTING);
+      intakeRollersSpeed = 0.5;
+      if (error <= 200) {
+        queuerSpeed = 0.5;
+      } else {
+        queuerSpeed = 0;
       }
-    } else if (outtaking) {
-      shooterPID.setReference(SHOOTER_VELOCITY_IDLING * 60.0 / 360.0, ControlType.kVelocity);
-      queuerSpeed = -0.5;
-    } else {
-      shooterPID.setReference(SHOOTER_VELOCITY_IDLING * 60.0 / 360.0, ControlType.kVelocity);
-      queuerSpeed = 0;
-    }
-
-    if (intaking) {
+    } else if (intaking) {
       intakeRollersSpeed = 0.4;
       wristPID.setReference(WRIST_POSITION_INTAKING / 360.0 * WRIST_GEARING, CANSparkMax.ControlType.kPosition);
+      queuerSpeed = 0;
     } else if (outtaking) {
       intakeRollersSpeed = -0.4;
       wristPID.setReference(WRIST_POSITION_OUTTAKING / 360.0 * WRIST_GEARING, CANSparkMax.ControlType.kPosition);
+      shooterPID.setReference(SHOOTER_VELOCITY_IDLING * 60.0 / 360.0, ControlType.kVelocity);
+      queuerSpeed = -0.5;
     } else {
       intakeRollersSpeed = 0;
       wristPID.setReference(WRIST_POSITION_IDLING / 360.0 * WRIST_GEARING, CANSparkMax.ControlType.kPosition);
+      shooterPID.setReference(SHOOTER_VELOCITY_IDLING * 60.0 / 360.0, ControlType.kVelocity);
+      queuerSpeed = 0;
     }
 
     queuer.set(queuerSpeed);
