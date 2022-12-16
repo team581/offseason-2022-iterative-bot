@@ -52,7 +52,7 @@ public class SwerveModule {
   public void log() {
     SmartDashboard.putNumber("Swerve/" + label + "/DriveMotorVelocity", getDriveMotorVelocity());
     SmartDashboard.putNumber("Swerve/" + label + "/SteerMotorAngle", getSteerMotorAngle().getDegrees());
-    SmartDashboard.putNumber("Swerve/" + label + "/CancoderLabel", getCancoderAngle().getDegrees());
+    SmartDashboard.putNumber("Swerve/" + label + "/CancoderAngle", getCancoderAngle().getDegrees());
   }
 
   private Rotation2d getCancoderAngle() {
@@ -60,7 +60,7 @@ public class SwerveModule {
   }
 
   private Rotation2d getSteerMotorAngle() {
-    return Rotation2d.fromDegrees(steerMotor.getSelectedSensorPosition() / 12.8 / 2048.0);
+    return Rotation2d.fromDegrees(steerMotor.getSelectedSensorPosition() / 12.8 / 2048.0 * 360.0);
   }
 
   private double getDriveMotorVelocity() {
@@ -72,11 +72,11 @@ public class SwerveModule {
   }
 
   private void setSteerMotorAngle(Rotation2d angle) {
-    steerMotor.set(TalonFXControlMode.Position, angle.getDegrees() * 12.8 * 2048.0);
+    steerMotor.set(TalonFXControlMode.Position, angle.getDegrees() * 12.8 * 2048.0 / 360.0);
   }
 
   private void resetSteerMotorAngle() {
     Rotation2d canCoderAngle = getCancoderAngle();
-    steerMotor.setSelectedSensorPosition(canCoderAngle.getDegrees() * 12.8 * 2048.0);
+    steerMotor.setSelectedSensorPosition(canCoderAngle.getDegrees() * 12.8 * 2048.0 / 360.0);
   }
 }
