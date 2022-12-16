@@ -42,6 +42,9 @@ public class SwerveModule {
   }
 
   public void setState(SwerveModuleState state) {
+    Rotation2d steerMotorAngle = getSteerMotorAngle();
+    state = CtreModuleState.optimize(state, steerMotorAngle);
+
     setDriveMotorVelocity(state.speedMetersPerSecond);
     setSteerMotorAngle(state.angle);
   }
