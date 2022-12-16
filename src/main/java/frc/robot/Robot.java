@@ -49,10 +49,10 @@ public class Robot extends TimedRobot {
   private static final double SHOOTER_VELOCITY_SHOOTING = 2000.0 * 360.0 / 60.0;
   private static final double SHOOTER_VELOCITY_IDLE = 700.0 * 360.0 / 60.0;
 
-  private final SwerveModule frontLeft = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "FrontLeft");
-  private final SwerveModule frontRight = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "FrontRight");
-  private final SwerveModule backLeft = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "BackLeft");
-  private final SwerveModule backRight = new SwerveModule(new TalonFX(999), new TalonFX(999), new CANCoder(999), Rotation2d.fromDegrees(0), "BackRight");
+  private final SwerveModule frontLeft = new SwerveModule(new TalonFX(2), new TalonFX(3), new CANCoder(10), Rotation2d.fromDegrees(104.6), "FrontLeft");
+  private final SwerveModule frontRight = new SwerveModule(new TalonFX(4), new TalonFX(5), new CANCoder(11), Rotation2d.fromDegrees(78.95), "FrontRight");
+  private final SwerveModule backLeft = new SwerveModule(new TalonFX(6), new TalonFX(7), new CANCoder(12), Rotation2d.fromDegrees(-148), "BackLeft");
+  private final SwerveModule backRight = new SwerveModule(new TalonFX(8), new TalonFX(9), new CANCoder(13), Rotation2d.fromDegrees(-62.53), "BackRight");
 
 
   private final CANSparkMax wrist = new CANSparkMax(16, MotorType.kBrushless);
