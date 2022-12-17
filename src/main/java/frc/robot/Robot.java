@@ -69,9 +69,7 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   @Override
-  public void robotInit() {
-    intakeRollers.setInverted();
-  }
+  public void robotInit() {}
 
   /** This function is called periodically during operator control. */
   @Override

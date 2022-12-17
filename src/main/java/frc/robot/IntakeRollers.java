@@ -8,10 +8,12 @@ import com.revrobotics.CANSparkMax;
 
 /** Add your docs here. */
 public class IntakeRollers {
-    private CANSparkMax intakeRollers;
+    private final CANSparkMax intakeRollers;
 
     public IntakeRollers(CANSparkMax intakeRollers) {
         this.intakeRollers = intakeRollers;
+
+        intakeRollers.setInverted(true);
     }
 
     public void intake() {
@@ -24,9 +26,5 @@ public class IntakeRollers {
 
     public void stop() {
         intakeRollers.set(0);
-    }
-
-    public void setInverted() {
-        return;
     }
 }

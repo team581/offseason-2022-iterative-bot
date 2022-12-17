@@ -21,8 +21,8 @@ public class Superstructure {
     public void intaking() {
         intakeRollers.intake();
         shooter.stop();
-        wrist.GoToIntakePosition();
-        if (queuer.sensor()) {
+        wrist.goToIntakePosition();
+        if (queuer.hasBall()) {
             queuer.stop();
         } else {
             queuer.toShooter();
@@ -33,12 +33,12 @@ public class Superstructure {
         intakeRollers.outtake();
         shooter.stop();
         queuer.toOuttaker();
-        wrist.GoToOuttakePosition();
+        wrist.goToOuttakePosition();
     }
 
     public void shooting() {
         shooter.start();
-        wrist.GoToIntakePosition();
+        wrist.goToIntakePosition();
         if (shooter.isReadyToShoot()) {
             intakeRollers.intake();
             queuer.toShooter();
@@ -52,6 +52,6 @@ public class Superstructure {
         shooter.stop();
         queuer.stop();
         intakeRollers.stop();
-        wrist.GoToIdlePosition();
+        wrist.goToIdlePosition();
     }
 }

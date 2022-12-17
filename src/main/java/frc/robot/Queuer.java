@@ -29,7 +29,7 @@ public class Queuer {
         motor.set(0);
     }
 
-    public boolean sensor() {
+    public boolean hasBall() {
         return sensor.get(); 
     }
 }

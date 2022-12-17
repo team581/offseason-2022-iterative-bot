@@ -42,15 +42,15 @@ public class Wrist {
         SmartDashboard.putNumber("wrist/angle", encoder.getPosition() * 360.0 / WRIST_GEARING);
     }
 
-    public void GoToIntakePosition() {
+    public void goToIntakePosition() {
         pid.setReference(WRIST_POSITION_INTAKING, ControlType.kPosition);
     }
 
-    public void GoToOuttakePosition() {
+    public void goToOuttakePosition() {
         pid.setReference(WRIST_POSITION_OUTTAKING, ControlType.kPosition);
     }
 
-    public void GoToIdlePosition() {
+    public void goToIdlePosition() {
         pid.setReference(WRIST_POSITION_IDLE, ControlType.kPosition);
     }
 }
