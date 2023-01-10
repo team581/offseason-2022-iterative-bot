@@ -26,7 +26,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -56,12 +55,12 @@ public class Robot extends TimedRobot {
       Rotation2d.fromDegrees(-58.0));
   private final SwerveModule backRightModule = new SwerveModule(8, 9, "BackRight", new CANCoder(13),
       Rotation2d.fromDegrees(27.47));
-  private final Wrist wrist = new Wrist(new CANSparkMax(16, MotorType.kBrushless));
-  private final Shooter shooter = new Shooter(new CANSparkMax(18, MotorType.kBrushless));
-  private final Queuer queuer = new Queuer(new CANSparkMax(17, MotorType.kBrushless));
-  private final IntakeRollers intakeRollers = new IntakeRollers(new CANSparkMax(15, MotorType.kBrushless));
+  // private final Wrist wrist = new Wrist(new CANSparkMax(16, MotorType.kBrushless));
+  // private final Shooter shooter = new Shooter(new CANSparkMax(18, MotorType.kBrushless));
+  // private final Queuer queuer = new Queuer(new CANSparkMax(17, MotorType.kBrushless));
+  // private final IntakeRollers intakeRollers = new IntakeRollers(new CANSparkMax(15, MotorType.kBrushless));
   private final XboxController controller = new XboxController(0);
-  private final Superstructure superstructure = new Superstructure(shooter, wrist, intakeRollers, queuer); 
+  // private final Superstructure superstructure = new Superstructure(shooter, wrist, intakeRollers, queuer); 
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -77,16 +76,17 @@ public class Robot extends TimedRobot {
     boolean intaking = controller.getLeftTriggerAxis() > 0.5;
     boolean outtaking = controller.getLeftBumper();
     boolean shooting = controller.getRightTriggerAxis() > 0.5;
-    if (intaking) {
-      superstructure.intaking();
-    } else if (outtaking) {
-      superstructure.outtaking();
-    } else if (shooting) {
-      superstructure.shooting();
-    } else {
-      superstructure.nothingHappening();
-    }
+    // if (intaking) {
+    //   superstructure.intaking();
+    // } else if (outtaking) {
+    //   superstructure.outtaking();
+    // } else if (shooting) {
+    //   superstructure.shooting();
+    // } else {
+    //   superstructure.nothingHappening();
+    // }
     // set front of the robot to positive Y
+    
     ChassisSpeeds speeds = new ChassisSpeeds(controller.getLeftX(), controller.getLeftY(), controller.getRightX());
     SwerveModuleState[] moduleStates = KINEMATICS.toSwerveModuleStates(speeds);
     SwerveModuleState frontLeft = moduleStates[0];
@@ -102,13 +102,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Queuer/current", queuer.motor.getOutputCurrent());
-    SmartDashboard.putBoolean("Queuer/sensor", queuer.sensor.get());
+    // SmartDashboard.putNumber("Queuer/current", queuer.motor.getOutputCurrent());
+    // SmartDashboard.putBoolean("Queuer/sensor", queuer.sensor.get());
     frontLeftModule.log();
     frontRightModule.log();
     backLeftModule.log();
     backRightModule.log();
-    wrist.log();
-    shooter.log();
+    // wrist.log();
+    // shooter.log();
   }
 }

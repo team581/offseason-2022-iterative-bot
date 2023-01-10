@@ -50,16 +50,18 @@ public class SwerveModule {
 
     public void setAngleAndDrive(Rotation2d angle, double driving) {
         //divide by 360 bc 360 degrees is 1 rotation and we don't have getRotations() so we need to convert degrees to rotations. 
+
         steering.set(TalonFXControlMode.Position, angle.getDegrees() * ticksPerRotation / 360);
         drive.set(TalonFXControlMode.PercentOutput, driving);
 
         SmartDashboard.putNumber("Swerve/" + name + "/angle",angle.getDegrees());
+        SmartDashboard.putNumber("Swerve/" + name + "/drive", driving);
     }
 
     public void log() {
         SmartDashboard.putNumber("Swerve/" + name + "/Position", steering.getSelectedSensorPosition() / ticksPerRotation * 360);
-        //SmartDashboard.putNumber("Swerve/FrontLeft", .angle);
-        //SmartDashboard.putNumber("Swerve/" + name + "/Speed", drive.getVelocity());
+        // SmartDashboard.putNumber("Swerve/FrontLeft", .angle);
+        // SmartDashboard.putNumber("Swerve/" + name + "/Speed", drive.getVelocity());
     }
 
     // private double getVelocity() {
