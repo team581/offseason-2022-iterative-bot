@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -93,6 +94,11 @@ public class Robot extends TimedRobot {
     SwerveModuleState frontRight = moduleStates[1];
     SwerveModuleState backLeft = moduleStates[2];
     SwerveModuleState backRight = moduleStates[3];
+
+    frontLeft = CtreModuleState.optimize(frontLeft, frontLeftModule.getRotation());
+    frontRight = CtreModuleState.optimize(frontRight, frontRightModule.getRotation());
+    backLeft = CtreModuleState.optimize(backLeft, backLeftModule.getRotation());
+    backRight = CtreModuleState.optimize(backRight, backRightModule.getRotation());
 
     frontLeftModule.setAngleAndDrive(frontLeft.angle, frontLeft.speedMetersPerSecond);
     frontRightModule.setAngleAndDrive(frontRight.angle, frontRight.speedMetersPerSecond);

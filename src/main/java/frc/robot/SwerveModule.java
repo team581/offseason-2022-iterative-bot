@@ -12,6 +12,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -46,6 +47,17 @@ public class SwerveModule {
 
     public void setRotation(double value) {
         steering.set(TalonFXControlMode.Position, value * ticksPerRotation);
+    }
+
+    public Rotation2d getRotation() {
+        // Get Falcon sensor units of rotations. encoder 
+        double encoderUnits = steering.getSelectedSensorPosition();
+        // Convert sensor units to rotations with gearing value.
+        double rotations = encoderUnits / ticksPerRotation;
+        // Convert rotations to Rotation2D.
+        Rotation2d getRotation = new Rotation2d(Units.rotationsToRadians(rotations));
+        // Return Rotation2D.
+        return getRotation;
     }
 
     public void setAngleAndDrive(Rotation2d angle, double driving) {
